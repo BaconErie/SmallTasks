@@ -3,14 +3,71 @@
 
   <head>
     <script>
-      
+      //Post data to API function
+      async function postData(dataToPost){
+
+        try{
+
+          const response = await fetch("/{{listID}}/api", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({data: dataToPost})
+          });
+
+        }
+        catch(error){
+          console.warn(error);
+        }
+
+      }
+
+      async function getData(){
+
+        try{
+
+          const response = await fetch("/{{listID}}/api")
+          const responseJSON = await response.json()
+          return responseJSON["data"]
+        }
+        catch(error){
+          console.warn(error);
+        }
+      }
+
+      async function addTask(){
+        let task = document.getElementById("taskInput").value;
+        await postData(task);
+        let todoData = await getData();
+        
+        createList(todoData);
+
+        document.getElementById("taskInput").value = "";
+      }
+
+      function createList(todoData){
+        if(todoData == "nothing"){
+          document.getElementById("list").innerHTML = "Nothing in the list... <br> Add a task below!";
+          return
+        }
+        let listString = ""
+        for(let i = 0; i < todoData.length; i++){
+          listString = listString + "<br>" + (i+1) + ". " + todoData[i];
+        }
+        document.getElementById("list").innerHTML = listString;
+      }
+
+      getData()
+      .then(data => createList(data))
+
     </script>
   </head>
 
   <body>
-    <p>Loading list {{listID}}...</p>
+    <p id="list">Loading list {{listID}}...</p>
     <br>
     <input type="text" id="taskInput" placeholder="Type new task">
-    <button>Add task</button>
+    <button onclick="addTask()">Add task</button>
   </body>
 </html>

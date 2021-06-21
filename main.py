@@ -21,7 +21,7 @@ def api(listID):
     #Then put into database
 
     #Check if there is already a list
-    if listID in todoDatabase.keys:
+    if listID in todoDatabase.keys():
       #If there is, just add it to the list
       todoDatabase[listID].append(requestData)
     else:
