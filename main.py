@@ -21,7 +21,7 @@ def api(listID):
     #Then put into database
 
     #Check if there is already a list
-    if todoDatabase[listID] != None:
+    if listID in todoDatabase.keys:
       #If there is, just add it to the list
       todoDatabase[listID].append(requestData)
     else:
@@ -32,8 +32,14 @@ def api(listID):
     return "Successfully POSTed data"
 
   elif request.method == "GET":
-    pass
-    return "Get Success"
+    #Check if there is data for the to do list
+    if listID in todoDatabase.keys():
+      #If there is data send data
+      responseDict = {"data": todoDatabase[listID]}
+      return responseDict
+    else:
+      #If there isn't return nothing
+      return {"data": "nothing"}
 
 if __name__ == "__main__":
   app.run(debug=True, host="0.0.0.0")
