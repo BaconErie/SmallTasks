@@ -4,7 +4,7 @@
   <head>
     <script>
       //Post data to API function
-      async function postData(dataToPost){
+      async function postAPI(jsonData){
 
         try{
 
@@ -13,7 +13,7 @@
             headers: {
               "Content-Type": "application/json"
             },
-            body: JSON.stringify({data: dataToPost})
+            body: JSON.stringify(jsonData)
           });
 
         }
@@ -29,7 +29,7 @@
 
           const response = await fetch("/{{listID}}/api")
           const responseJSON = await response.json()
-          return responseJSON["data"]
+          return responseJSON
         }
         catch(error){
           console.warn(error);
@@ -38,10 +38,10 @@
 
       async function addTask(){
         let task = document.getElementById("taskInput").value;
-        await postData(task);
+        await postAPI({type: "add", data: task});
         let todoData = await getData();
         
-        createList(todoData);
+        createList(todoData["data"]);
 
         document.getElementById("taskInput").value = "";
       }
