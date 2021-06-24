@@ -2,6 +2,8 @@
 <html>
 
   <head>
+    <title>SmallTasks Todo List</title>
+
     <script>
       //Post data to API function
       async function postAPI(jsonData){
@@ -38,16 +40,24 @@
 
       async function addTask(){
         let task = document.getElementById("taskInput").value;
+
+        //Check if user didn't type anything
+        if(task == ""){
+          //If they didn't tell user and return
+          alert("You must add something into the taskbox!");
+          return;
+        }
         await postAPI({type: "add", data: task});
         let todoData = await getData();
-        
-        createList(todoData["data"]);
+        let todoList = todoData["data"]
+
+        createList(todoList);
 
         document.getElementById("taskInput").value = "";
       }
 
       function createList(todoData){
-        if(todoData == "nothing"){
+        if(todoData == "nothing" || todoData.length == 0){
           document.getElementById("list").innerHTML = "Nothing in the list... <br> Add a task below!";
           return
         }
@@ -58,9 +68,34 @@
         document.getElementById("list").innerHTML = listString;
       }
 
-      getData()
-      .then(data => createList(data))
+      async function removeTask(){
+        let itemNum = document.getElementById("item").value;
 
+        //Check if user entered anything
+        if(itemNum == ""){
+          //If they didn't alert user
+          alert("You must enter a task to be removed!")
+        }
+
+        let response = await postAPI({type: "remove", item: itemNum});
+
+        //Check for response
+        if(response == "Item not in list"){
+          alert("The task to be removed does not exist!");
+          return
+        }else if(response == "List does not exist"){
+          alert("There is nothing in the list");
+          return
+        }
+
+        let todoData = await getData();
+        createList(todoData["data"]);
+
+        document.getElementById("item").value = "";
+      }
+
+      getData()
+      .then(data => createList(data["data"]))
     </script>
   </head>
 
@@ -69,5 +104,10 @@
     <br>
     <input type="text" id="taskInput" placeholder="Type new task">
     <button onclick="addTask()">Add task</button>
+
+    <br>
+
+    <input type="number" id="item">
+    <button onclick="removeTask()">Remove task</button>
   </body>
 </html>

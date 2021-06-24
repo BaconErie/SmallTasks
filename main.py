@@ -13,6 +13,7 @@ def todo(listID):
 
 @app.route("/<listID>/api", methods = ["GET", "POST"])
 def api(listID):
+
   if request.method == "POST":
     #Get the JSON
     requestTable = request.get_json()
@@ -33,23 +34,20 @@ def api(listID):
         #Otherwise, create a new list and add data to list
         todoDatabase[listID] = []
         todoDatabase[listID].append(requestData)
-      print(todoDatabase[listID])
-      return "Successfully added task"
 
     if requestTable["type"] == "remove":
       #Remove Task
 
       #Check if list exists
-      global todoDatabase
       if listID in todoDatabase.keys():
         #Check if item exists
-        if requestTable["item"] <= len(todoDatabase[listID]) and requestTable["item"] > 0:
+        if int(requestTable["item"]) <= len(todoDatabase[listID]) and int(requestTable["item"]) > 0:
           #If all condtions are true, remove data from table
-          todoDatabase[listID].pop(requestTable["item"])
+          todoDatabase[listID].pop(int(requestTable["item"]) - 1)
         else:
           return "Item not in list"
       else:
-        return "List does not exists"
+        return "List does not exist"
 
   elif request.method == "GET":
     #Check if there is data for the to do list
@@ -60,6 +58,8 @@ def api(listID):
     else:
       #If there isn't return nothing
       return {"data": "nothing"}
+  
+  return "Success"
 
 if __name__ == "__main__":
   app.run(debug=True, host="0.0.0.0")
