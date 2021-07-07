@@ -75,6 +75,7 @@
         if(itemNum == ""){
           //If they didn't alert user
           alert("You must enter a task to be removed!")
+          return;
         }
 
         let response = await postAPI({type: "remove", item: itemNum});

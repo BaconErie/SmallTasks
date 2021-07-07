@@ -1,7 +1,21 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <title>SmallTasks</title>
+    <script>
+      function goToList(){
+        let listID = document.getElementById("listID").value;
+
+        window.location.href = "/" + listID;
+      }
+    </script>
+  </head>
+    
   <body>
-    <h1>Hello world, SmallTasks!</h1>
-    <p>It's kind of empty right now. Check back later.</p>
+    <h1>SmallTasks</h1>
+    <h2>A simple, free and open sourced todo list</h2>
+    <p>Enter a ListID below to go to that list. Note that all lists are public as of right now.</p>
+    <input type="text" placeholder="Enter ListID here" id="listID">
+    <button onclick="goToList()">Click to go to list</button>
   </body>
 </html>
