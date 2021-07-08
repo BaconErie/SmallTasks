@@ -28,14 +28,23 @@ def createTable():
 def getList(listID):
   connection = sqlite3.connect("tasksData.db")
   cursor = connection.cursor()
-  print(listID)
-  cursor.execute("SELECT * FROM Tasks WHERE listID=? ORDER BY taskNum", [listID])
+  cursor.execute("SELECT task FROM Tasks WHERE listID=? ORDER BY taskNum", [listID])
   connection.commit()
-  output = cursor.fetchone()
+  output = cursor.fetchall()
 
   connection.close()
 
-  return output
+  if output:
+    #Loop through all the outputs, and turn all the tuples into a string in a list
+    returnList = []
+    for x in range(len(output)):
+      #Turn the tuple into a list and then get the first element which is the string
+      #After that, put into return list
+      returnList.append(list(output[x])[0])
+    
+    return returnList
+  else:
+    return None
 
 def setList(listID, todoList):
   connection = sqlite3.connect("tasksData.db")
@@ -47,7 +56,7 @@ def setList(listID, todoList):
 
   #Then loop through the given todo list and enter all the new entries into the table
   for x in range(len(todoList)):
-    cursor.execute("INSERT INTO Tasks (listID, taskNum, task) VALUES (?, ?, ?)", (listID, x + 1, todoList[x]))
+    cursor.execute("INSERT INTO Tasks (listID, taskNum, task) VALUES (?, ?, ?)", (listID, (x + 1), todoList[x]))
     connection.commit()
   
   connection.close()
