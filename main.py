@@ -1,3 +1,6 @@
+#SmallTasks Version 1.0.0 Development Version
+#Created by BaconErie
+
 from flask import Flask, render_template, request
 import sqlite3
 
