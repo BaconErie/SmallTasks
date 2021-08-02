@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <title>Log In - SmallTasks</title>
+      <script>
+          async function postLogin(usernameAuth, passwordAuth){
+            let authJSON = {username: usernameAuth, password: passwordAuth};
+
+            let response = await fetch("/login/api",{
+                method: "POST",
+                headers:{
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(authJSON)
+            });
+
+            if(response.status == 200){
+                let responseJSON = await response.json()
+                return responseJSON["token"]
+            }else{
+                return response.status
+            }
+          }
+
+          async function login(){
+              let username = document.getElementById("username").value
+              let password = document.getElementById("password").value
+              let response = await postLogin(username, password)
+
+              //Checks
+
+              if(username == "" || password == ""){
+                  alert("You haven't filled in all the boxes!")
+                  return
+              }
+
+              if(typeof(response) == "string"){
+                  console.log("yup got token token");
+              }else if(response == 401){
+                  alert("Account not found or credentials incorrect. Please try again.");
+              }else if(response == 500){
+                  alert("The server encountered an error. Please try again at a later time, or alert the developer.");
+              }else if(response == 400){
+                  alert("A general request error occured. Please try again.");
+              }else{
+                  alert("An unknown error occured. The error code is " + response + ". Please contact the developer.");
+              }
+          }
+      </script>
+  </head>
+  <body>
+      <h1>Login Page</h1>
+      <p>Username</p>
+      <input type="text" placeholder="Enter Username" id="username">
+      <p>Password</p>
+      <input type="password" placeholder="Enter Password" id="password">
+        <br><br>
+      <button id="login" onclick="login()">Log In</button>
+        <br><br>
+      <a href="/signup.html">Don't have an account? Click here to sign up</a>
+  </body>
+</html>
