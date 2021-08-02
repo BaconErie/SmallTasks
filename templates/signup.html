@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script>
+            async function postSignup(usernameSignup, passwordSignup){
+            let signupJSON = {username: usernameSignup, password: passwordSignup};
+
+            let response = await fetch("/signup",{
+                method: "POST",
+                headers:{
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(signupJSON)
+            });
+
+            return response.status;
+          }
+
+          async function signup(){
+              //Checks
+              let username = document.getElementById("username").value
+              let password = document.getElementById("password").value
+              let confirmPassword = document.getElementById("confirmPassword").value
+
+              if(username == "" || password == "" || confirmPassword == ""){
+                  alert("You haven't filled in all the boxes!")
+                  return
+              }
+              if(password != confirmPassword){
+                  alert("The password in the password box and in the confirm password box don't match.");
+                  return
+              }
+
+              let response = await postSignup(username, password)
+                
+              if(response == 201){
+                  alert("Sign up successful! You may now login. Welcome to SmallTasks!");
+              }else if(response == 409){
+                  alert("Account with the same username exists. Please try logging in.");
+              }else if(response == 500){
+                  alert("The server encountered an error. Please try again at a later time, or alert the developer.");
+              }else if(response == 400){
+                  alert("A general request error occured. Please try again.");
+              }else{
+                  alert("An unknown error occured. The error code is " + response + ". Please contact the developer.");
+            
+
+
+              }
+          }
+        </script>
+    </head>
+    <body>
+        <h1>Sign Up</h1>
+        <p>Username</p>
+        <input type="text" id="username" placeholder="Enter Username">
+        <p>Password</p>
+        <input type="password" id="password" placeholder="Enter Password">
+        <p>Confim Password</p>
+        <input type="password" id="confirmPassword" placeholder="Confirm Password">
+        <br><br>
+
+        <button id="signUp" onclick="signup()">Sign Up</button>
+        <br><br>
+        <a href="/login.html">Already have an account? Click here to log in</a>
+    </body>
+</html>

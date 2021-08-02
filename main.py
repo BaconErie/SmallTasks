@@ -1,149 +1,103 @@
-#SmallTasks Version 1.0.0 Development Version
-#Created by BaconErie
+# SmallTasks Version 1.0.0 Development Version
+# Created by BaconErie
 
 from flask import Flask, render_template, request
-import sqlite3
-
-######################### Data Saving
-
-#Tasks Table Creation
-def createTable():
-  connection = sqlite3.connect("tasksData.db")
-  cursor = connection.cursor()
-
-  #Check if table exists
-  cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='Tasks';")
-  connection.commit()
-  output = cursor.fetchone()
-  
-  if not output:
-    #If the table doesn't exist, create table
-    cursor.execute("CREATE TABLE Tasks (listID int, taskNum int, task text)")
-
-    connection.commit()
-  
-  connection.close()
-
-#Get Todo List data from Tasks table
-def getList(listID):
-  connection = sqlite3.connect("tasksData.db")
-  cursor = connection.cursor()
-  cursor.execute("SELECT task FROM Tasks WHERE listID=? ORDER BY taskNum", [listID])
-  connection.commit()
-  output = cursor.fetchall()
-
-  connection.close()
-
-  if output:
-    #Loop through all the outputs, and turn all the tuples into a string in a list
-    returnList = []
-    for x in range(len(output)):
-      #Turn the tuple into a list and then get the first element which is the string
-      #After that, put into return list
-      returnList.append(list(output[x])[0])
-    
-    return returnList
-  else:
-    return None
-
-def setList(listID, todoList):
-  connection = sqlite3.connect("tasksData.db")
-  cursor = connection.cursor()
-
-  #First delete all current entries that belong to the todoList
-  cursor.execute("DELETE FROM Tasks WHERE listID=?", [listID])
-  connection.commit()
-
-  #Then loop through the given todo list and enter all the new entries into the table
-  for x in range(len(todoList)):
-    cursor.execute("INSERT INTO Tasks (listID, taskNum, task) VALUES (?, ?, ?)", (listID, (x + 1), todoList[x]))
-    connection.commit()
-  
-  connection.close()
+import databaseAPI
+import auth
 
 #Run the createTable function on startup
-createTable()
-
-########################### End Data Saving Code
+databaseAPI.createTable()
 
 app = Flask(__name__)
 todoDatabase = {}
 
 @app.route("/")
 def index():
-  return render_template("index.html")
+    return render_template("index.html")
+
+@app.route('/signup', methods = ['GET', 'POST'])
+def signup():
+    if request.method == 'GET':
+        return render_template('signup.html')
+    if request.method == 'POST':
+        json = request.get_json()
+        print('New sign up request. Username is ' + json['username'] + ' and password is ' + json['password'])
+        return "Success", 201
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
 
 @app.route("/<listID>")
 def todo(listID):
-  return render_template("todo.html", listID=listID)
+    return render_template("todo.html", listID=listID)
 
 @app.route("/<listID>/api", methods = ["GET", "POST"])
 def api(listID):
+    if request.method == "POST":
+        #Get the JSON
+        requestTable = request.get_json()
+        #Check what the client wants to do
+        if requestTable["type"] == "add":
+            #Add task
 
-  if request.method == "POST":
-    #Get the JSON
-    requestTable = request.get_json()
-    #Check what the client wants to do
-    if requestTable["type"] == "add":
-      #Add task
+            global todoDatabase
+            #Get the data that is to be added to the todo list
+            requestData = requestTable["data"]
 
-      global todoDatabase
-      #Get the data that is to be added to the todo list
-      requestData = requestTable["data"]
+            #Edit list and then put list into the database
 
-      #Edit list and then put list into the database
+            currentList = databaseAPI.getList(listID)
 
-      currentList = getList(listID)
+            #Check if there is already a list
+            if currentList:
+                #If there is, just add to the list and push to database
+                currentList.append(requestData)
+                databaseAPI.setList(listID, currentList)
+                return "Added data success"
 
-      #Check if there is already a list
-      if currentList:
-        #If there is, just add to the list and push to database
-        currentList.append(requestData)
-        setList(listID, currentList)
-        return "Added data success"
+            else:
+                #Otherwise, create a new list and add data to list
+                currentList = []
+                currentList.append(requestData)
+                #Push data to database
+                databaseAPI.setList(listID, currentList)
+                return "Created list and added data success"
 
-      else:
-        #Otherwise, create a new list and add data to list
-        currentList = []
-        currentList.append(requestData)
-        #Push data to database
-        setList(listID, currentList)
-        return "Created list and added data success"
+        if requestTable["type"] == "remove":
+            #Remove Task
 
-    if requestTable["type"] == "remove":
-      #Remove Task
+            currentList = databaseAPI.getList(listID)
 
-      currentList = getList(listID)
+            #Check if list exists
+            if currentList:
+                #Check if item exists
+                if int(requestTable["item"]) <= len(currentList) and int(requestTable["item"]) > 0:
+                    #If all condtions are true, remove data from table
+                    currentList.pop(int(requestTable["item"]) - 1)
+                    #Push data to database
+                    databaseAPI.setList(listID, currentList)
+                else:
+                    return "Item not in list"
+            else:
+                return "List does not exist"
 
-      #Check if list exists
-      if currentList:
-        #Check if item exists
-        if int(requestTable["item"]) <= len(currentList) and int(requestTable["item"]) > 0:
-          #If all condtions are true, remove data from table
-          currentList.pop(int(requestTable["item"]) - 1)
-          #Push data to database
-          setList(listID, currentList)
+    elif request.method == "GET":
+        #Check if there is data for the to do list
+        
+        currentList = databaseAPI.getList(listID)
+        
+        if currentList:
+            #If there is data send data
+            responseDict = {"data": currentList}
+            return responseDict
         else:
-          return "Item not in list"
-      else:
-        return "List does not exist"
-
-  elif request.method == "GET":
-    #Check if there is data for the to do list
+            #If there isn't return nothing
+            return {"data": "nothing"}
     
-    currentList = getList(listID)
+    return "Success"
     
-    if currentList:
-      #If there is data send data
-      responseDict = {"data": currentList}
-      return responseDict
-    else:
-      #If there isn't return nothing
-      return {"data": "nothing"}
-  
-  return "Success"
-  
 
 
 if __name__ == "__main__":
-  app.run(debug=True, host="0.0.0.0")
+    app.run(debug=True, host="0.0.0.0")

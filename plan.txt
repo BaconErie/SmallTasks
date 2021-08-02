@@ -1,0 +1,31 @@
+ok so 
+
+this is the auth plan
+
+like how we auth users
+
+3 tables
+
+1. Tasks table
+  a. id (int)
+  b. Tasks
+  c. list id
+  d. taskNum
+2. List table
+  a. id (text)
+  c. userID (from the Credentials table)
+3. Credentials table
+  a. id (text)
+  b. username
+  c. password (encrypted)
+
+when user wants to add something right
+
+we check token and stuff
+
+then we check the list the user is trying to change
+
+and if list allow user
+
+sure we add
+
