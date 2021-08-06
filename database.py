@@ -1,14 +1,5 @@
 import sqlite3
 
-def sanitize_name(name):
-    ''' Sanitize the name so that injection exploits are gone '''
-    sanitized_name = ''
-    for char in name:
-        if char.isalpha() or char.isdigit() or char == '_':
-            sanitized_name = sanitized_name + char
-    
-    return sanitized_name
-
 #Tasks Table Creationn
 def createTable():
   connection = sqlite3.connect("tasksData.db")
@@ -81,16 +72,6 @@ def setList(listID, todoList):
     connection.commit()
   
   connection.close()
-
-def set_table(table, data):
-    connection = sqlite3.connect('taskData.db')
-    cursor = connection.cursor()
-
-    cursor.execute('DELETE FROM ' + sanitize_name(name))
-    connection.commit()
-
-    for x in range(len(data)):
-        cursor.execute('INSERT INTO {} {} VALUES (?, ?,?)   ')
         
 
     
