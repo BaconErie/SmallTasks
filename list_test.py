@@ -60,3 +60,5 @@ print(output)
 print('Testing no perms delete_list')
 output = list.delete_list('eve', list_id)
 print(output)
+
+print('Good day world! Ending script...')
