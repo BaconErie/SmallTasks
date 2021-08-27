@@ -38,7 +38,7 @@ def remove_item(user_id, list_id, item_num):
     contents.pop(item_num - 1)
     
     #Delete all tasks part of list
-    cursor.execute('DELETE FROM task WHERE list_id=?', (list_id))
+    cursor.execute('DELETE FROM task WHERE list_id=?', (list_id,))
     connection.commit()
     
     #Add tasks back in table except for deleted task
@@ -57,7 +57,7 @@ def create_list(user_id):
     while not_generated:
         new_list_id = secrets.token_urlsafe(8)
 
-        cursor.execute('SELECT * FROM list WHERE list_id=?', (new_list_id))
+        cursor.execute('SELECT * FROM list WHERE list_id=?', (new_list_id,))
         connection.commit()
 
         if len(cursor.fetchall()) == 0:
@@ -77,7 +77,7 @@ def get_list(user_id, list_id):
     connection = sqlite3.connect('SmallTasks_Data.db')
     cursor = connection.cursor()
 
-    cursor.execute('SELECT task_body FROM task WHERE list_id=? ORDER BY task_num', (list_id))
+    cursor.execute('SELECT task_body FROM task WHERE list_id=? ORDER BY task_num', (list_id,))
     connection.commit()
 
     output = cursor.fetchall()
@@ -95,10 +95,10 @@ def delete_list(user_id, list_id):
     cursor = connection.cursor()
 
     #Clear tasks
-    cursor.execute('DELETE FROM task WHERE list_id=?', (list_id))
+    cursor.execute('DELETE FROM task WHERE list_id=?', (list_id,))
 
     #Clear list from list table
-    cursor.execute('DELETE FROM task WHERE user_id=? AND list_id=?', (user_id, list_id))
+    cursor.execute('DELETE FROM list WHERE user_id=? AND list_id=?', (user_id, list_id))
 
     connection.close()
 
