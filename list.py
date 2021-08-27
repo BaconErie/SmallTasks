@@ -9,7 +9,7 @@ def check_list_permission(function):
         cursor.execute('SELECT * FROM list WHERE user_id=? AND list_id=?', (user_id, list_id))
         connection.commit()
 
-        if len(cursor.fetchone()) == 0:
+        if len(cursor.fetchall()) == 0:
             connection.close()
             return 'No Perms'
         else:
@@ -38,14 +38,14 @@ def remove_item(user_id, list_id, item_num):
     contents.pop(item_num - 1)
     
     #Delete all tasks part of list
-    cursor.execute('DELETE FROM task WHERE list_id=?', (list_id)
+    cursor.execute('DELETE FROM task WHERE list_id=?', (list_id))
     connection.commit()
     
     #Add tasks back in table except for deleted task
     for task in contents:
         add_item(user_id, list_id, task)
 
-    connection.close()  
+    connection.close()
 
 def create_list(user_id):
     new_list_id = 0
@@ -68,6 +68,8 @@ def create_list(user_id):
     connection.commit()
 
     connection.close()
+    
+    return new_list_id
 
 @check_list_permission
 def get_list(user_id, list_id):
@@ -83,6 +85,8 @@ def get_list(user_id, list_id):
     for line in output:
         task_list.append(line[0])
     
+    connection.close()
+    
     return task_list
 
 @check_list_permission
@@ -95,3 +99,22 @@ def delete_list(user_id, list_id):
 
     #Clear list from list table
     cursor.execute('DELETE FROM task WHERE user_id=? AND list_id=?', (user_id, list_id))
+
+    connection.close()
+
+def get_owned_list(user_id):
+    connection = sqlite3.connect('SmallTasks_Data.db')
+    cursor = connection.cursor()
+    owned_lists = []
+
+    cursor.execute('SELECT list_id FROM list WHERE user_id=?')
+    connection.commit()
+
+    output = cursor.fetchall()
+
+    for line in output:
+        owned_lists.append(line[0])
+    
+    connection.close()
+
+    return owned_lists
