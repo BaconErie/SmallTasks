@@ -8,7 +8,7 @@ import secrets
 def generate_token(user_id):
     payload = {
         'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1, seconds=0),
-        'iat': datetime.datetdime.utcnow(),
+        'iat': datetime.datetime.utcnow(),
         'sub': user_id
     }
 
@@ -16,7 +16,7 @@ def generate_token(user_id):
 
 def decode_token(token):
     try:
-        payload = jwt.decode(token, 'secret')
+        payload = jwt.decode(token, 'secret', algorithms=["HS256"])
         return payload['sub']
     except jwt.ExpiredSignatureError:
         return 'Expired'
@@ -29,7 +29,7 @@ def create_account(username, password):
     connection = sqlite3.connect('SmallTasks_Data.db')
     cursor = connection.cursor()
 
-    cursor.execute('SELECT * FROM user WHERE username=?', (username))
+    cursor.execute('SELECT * FROM user WHERE username=?', (username,))
     connection.commit()
 
     if len(cursor.fetchall()) != 0:
@@ -39,7 +39,7 @@ def create_account(username, password):
     not_generated = True
     while not_generated:
         new_user_id = secrets.token_urlsafe(128)
-        cursor.execute('SELECT * FROM user WHERE user_id=?',(new_user_id))
+        cursor.execute('SELECT * FROM user WHERE user_id=?',(new_user_id,))
         connection.commit()
 
         if len(cursor.fetchall()) == 0:
@@ -58,7 +58,7 @@ def verify_password(username, password):
     connection = sqlite3.connect('SmallTasks_Data.db')
     cursor = connection.cursor()
     
-    cursor.execute('SELECT user_id, password FROM user WHERE username=?', (username))
+    cursor.execute('SELECT user_id, password FROM user WHERE username=?', (username,))
     connection.commit()
     
     output = cursor.fetchall()
@@ -67,7 +67,7 @@ def verify_password(username, password):
         connection.close()
         return 'Not Found'
     
-    if bcrypt.checkpw(password, output[0][1]):
+    if bcrypt.checkpw(password.encode(), output[0][1]):
         connection.close()
         return output[0][0]
     else:
@@ -82,16 +82,9 @@ def delete_account(username, password):
 
     if id == 'Not Found' or id == 'Invalid Password':
         connection.close()
-        return id
-    
-    
-    
-        
-        
-    
-    
-    
+        return 'Failed'
 
-    
+    cursor.execute('DELETE FROM user WHERE user_id=?', (id,))
+    connection.commit()
 
-    
+    connection.close()
